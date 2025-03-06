@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  livia:
+    container_name: livia
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=production
+      - API_KEY=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
+      - MC_KEY=2181174:ae186c527f7d90ea6aee7814c2140bde
+      - GGClient_ID=136995124926-2ivcj8mcpkg2dg988mg69g6326fltcig.apps.googleusercontent.com
+      - GGClient_KEY=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
+      - GG_redirect=https://livia.212industria.com/redirect
+      - R1_ID=12208050
+      - R2_ID=12208051
+      - R3_ID=12208052
+      - R4_ID=12208053
+      - EVENT_ID=12213807
+      - DATE=12213809
+      - RESPONSE_FLOW=content20240914122016_929535
+      - ASSISTANT=asst_ZJai0j5Wb5e5pKvffgWJ3Y2g
+      - IMG_FLOW=12213810
+      - AGENDOU=12208054
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./data:/app/data
+
+    restart: unless-stopped
