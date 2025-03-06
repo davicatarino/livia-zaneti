@@ -1,0 +1,32 @@
+{
+  "name": "livia",
+  "version": "1.0.0",
+  "description": "webhook que recebe dados do manychat ",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./index.js ",
+    "dev": "nodemon ./index.js"
+  },
+  "author": "davi catarino",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "form-data": "^4.0.0",
+    "googleapis": "^137.1.0",
+    "lowdb": "^7.0.1",
+    "moment-timezone": "^0.5.45",
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.7.1",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.41.0",
+    "pdf-parse": "^1.1.1",
+    "prettier": "^3.2.5",
+    "redis": "^4.7.0"
+  },
+  "engines": {
+    "node": ">=18.20.5"
+  }
+}
