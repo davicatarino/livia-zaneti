@@ -621,7 +621,7 @@ export async function handleChat(req, res) {
 
     console.log('ManyChat configurado:', manyChatConfig);
 
-    let transcricao = '';
+   let transcricao = '';
 
     // Verifica se a PerguntaMidia contém imagem, áudio ou PDF
     const imageExtensions = ['png', 'jpeg', 'jpg', 'gif'];
@@ -632,7 +632,6 @@ export async function handleChat(req, res) {
     const isAudio = userMessageMidia && audioExtensions.some(ext => userMessageMidia.endsWith(`.${ext}`));
     const isPDF = userMessageMidia && pdfExtensions.some(ext => userMessageMidia.endsWith(`.${ext}`));
 
-    // Se for áudio, fazer download e transcrever
     if (isAudio) {
       const fileName = `audio_${userID}_${Date.now()}.ogg`;
       const outputPath = path.join(__dirname, '../../audios', fileName);
@@ -641,6 +640,7 @@ export async function handleChat(req, res) {
       await downloadAudio(userMessageMidia, outputPath);
       console.log('Áudio baixado com sucesso:', outputPath);
 
+      // Transcreve o áudio usando a API do Whisper da OpenAI
       transcricao = await transcribeAudio(outputPath);
       console.log('Transcrição do áudio:', transcricao);
     } else if (isImage) {
@@ -665,8 +665,28 @@ export async function handleChat(req, res) {
       console.log('A PerguntaMidia não é um formato suportado ou está ausente:', userMessageMidia);
     }
 
-    // Monta o texto final a partir da pergunta + transcrição
-    const combinedMessage = `${userMessage || ''}\n${transcricao || ''}`.trim();
+    // Prepara o conteúdo da mensagem para enviar ao OpenAI
+    console.log('Preparando conteúdo da mensagem');
+    const messageContent = [];
+
+    if (userMessage && typeof userMessage === 'string') {
+      messageContent.push({
+        type: 'text',
+        text: `${userMessage || ''}\n${transcricao || ''}`.trim(),
+      });
+      console.log('Texto adicionado ao conteúdo da mensagem:', `${userMessage || ''}\n${transcricao || ''}`.trim());
+    }
+
+    if (isImage) {
+      messageContent.push({
+        type: 'image_url',
+        image_url: { url: userMessageMidia, detail: "hight" },
+      });
+      console.log('Imagem adicionada ao conteúdo da mensagem:', userMessageMidia);
+    }
+
+    // Combina a mensagem e/ou transcrição para enfileiramento
+    const combinedMessage = `${userMessage || ''}\n${transcricao || ''}\n${userMessageMidia || ''}`.trim();
     console.log('Mensagem combinada:', combinedMessage);
 
     // Enfileira a mensagem

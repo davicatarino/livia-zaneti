@@ -3,17 +3,16 @@ import { google } from 'googleapis';
 import moment from 'moment-timezone';
 import { setManyChatCustomField } from '../manychat/manyChatset.js';
 import { saveUserSchedule } from '../google/handleSaveSheets.js'; // Ajuste o caminho se necessário
-import Event from '../../models/eventModels.js';
 
 export async function handleEvent(args) {
   try {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-    console.log('Dados recebidos:', args);
+    console.log("📌 Recebendo argumentos na handleEvent:", args);
 
     // Extração de dados do usuário (incluindo os novos campos: Endereco e PagamentoAntecipado)
     const {
       Name: userName,
-      ManyChatID: userID,
+      ManyChatID: userID = null,  // Caso não venha, define como null
       Email: userEmail,
       Horario: userHour,
       Telefone: userTel,
@@ -21,11 +20,17 @@ export async function handleEvent(args) {
       Procedimento: userProced,
       ComoNosConheceu: userComoNosConheceu,
       Nascimento: userNascimento,
-      endereco: userEndereco,           // <-- agora em minúsculo
-      PagamentoConfirmado: userPagamento, // <-- agora combina
+      endereco: userEndereco,
+      PagamentoConfirmado: userPagamento,
       DraResponsavel: userDraResponsavel,
-      modelo: userModel,                // <-- agora em minúsculo
-    } = args;
+      modelo: userModel,
+    } = args || {}; // Evita erro caso args seja undefined
+    
+    console.log("Dados extraídos:", {
+      userName, userID, userEmail, userHour, userTel, userCpf, userProced,
+      userComoNosConheceu, userNascimento, userEndereco, userPagamento,
+      userDraResponsavel, userModel
+    });
     
 
     const manyChatSource = userDraResponsavel === 'Marina' ? 'manyChat2' : 'manyChat1';
@@ -103,15 +108,15 @@ export async function handleEvent(args) {
 
     // Configuração do evento
     const event = {
-      summary: `${userDraResponsavel}`,
+      summary: `${userName}`,
       description: `
-        Consulta agendada no Espaço Zaneti.
-        Nome: ${userName}
-        CPF: ${userCpf}
-        Telefone: ${userTel}
-        Nascimento: ${userNascimento}
-        Procedimento: ${userProced}
-        Como nos conheceu: ${userComoNosConheceu}
+        📅 Consulta agendada no Espaço Zaneti.
+        👤 Nome: ${userName}
+        🆔 CPF: ${userCpf}
+        📞 Telefone: ${userTel}
+        🎂 Nascimento: ${userNascimento}
+        💉 Procedimento: ${userProced}
+        🧐 Como nos conheceu: ${userComoNosConheceu}
       `,
       start: {
         dateTime: startDateTime,
@@ -160,23 +165,6 @@ export async function handleEvent(args) {
     
     console.log(`Campo personalizado ${fieldConfirmationID} atualizado para "sim" no ${manyChatKey}`);
     
-    // Salvar os dados no MongoDB
-    const newEvent = new Event({
-      userName,
-      userID,
-      userEmail,
-      userTel,
-      userCpf,
-      userProced,
-      userComoNosConheceu,
-      userNascimento,
-      userDraResponsavel,
-      eventId,
-    });
-
-    await newEvent.save();
-    console.log('Dados salvos no MongoDB');
-
     // Chamando a função para salvar os dados do agendamento na planilha do Google
     // Os campos requeridos:
     // - Nome completo: userName
@@ -191,9 +179,18 @@ export async function handleEvent(args) {
       cpf: userCpf,
       address: userEndereco,
       email: userEmail,
+      phone: userTel,
+      procedure: userProced,
+      howMet: userComoNosConheceu,
+      responsibleDoctor: userDraResponsavel,
+      appointmentDate: userHour,  
       advancePayment: userPagamento,
+      manyChatID: userID,  
+      appointmentID: eventId,  // Agora inclui o ID do evento
     });
-    console.log('Dados de agendamento salvos na planilha do Google.');
+    
+    console.log("Evento salvo na planilha com ID:", eventId);
+    
 
     return `Evento criado com sucesso. ID do evento: ${eventId}`;
   } catch (error) {

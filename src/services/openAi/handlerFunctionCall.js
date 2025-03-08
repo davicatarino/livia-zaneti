@@ -18,7 +18,11 @@ async function handleFunctionCall(toolCalls, userID, manyChatConfig) { // Adicio
       case 'handleEvent':
         try {
           // handleFunctionCall.js
-          const eventResult = await handleEventFunction({ ...args, ManyChatID: userID });
+          const eventResult = await handleEventFunction({
+            ...args,
+            ManyChatID: userID || args.ManyChatID,  // Se não existir, tenta pegar dos argumentos
+          });         
+          console.log("ARgumentos handleEvent:" + ...args) 
           output = eventResult;  // Certifique-se de que seja uma string.
         } catch (error) {
           output = `Erro ao criar evento: ${error.message}`;

@@ -21,7 +21,8 @@ const assistantFunctions = [
           DraResponsavel: { type: 'string', description: 'Nome da médica responsável pelo atendimento (Marina ou Marília)' },
           PagamentoConfirmado: { type: 'boolean', description: 'Se o pagamento antecipado foi confirmado' },
         },
-        required: ['Name', 'Email', 'Horario', 'Telefone', 'Procedimento', 'ComoNosConheceu','modelo', 'DraResponsavel', 'PagamentoConfirmado'],
+        required: ['Name', 'Email', 'Horario', 'Telefone', 'Procedimento', 'ComoNosConheceu', 'modelo', 'DraResponsavel'],
+
       },
     },
   },

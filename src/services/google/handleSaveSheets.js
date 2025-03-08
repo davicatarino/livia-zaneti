@@ -94,19 +94,38 @@ export async function GetUserInfo(userID, manyChatConfig) {
  *    - advancePayment: "Sim" ou "Não" (indicando se fez pagamento antecipado)
  */
 export async function saveUserSchedule(scheduleData) {
-  const { fullName, birthDate, cpf, address, email, advancePayment } = scheduleData;
+  const {
+    fullName,
+    birthDate,
+    cpf,
+    address,
+    email,
+    phone,
+    procedure,
+    howMet,
+    responsibleDoctor,
+    appointmentDate,
+    advancePayment,
+    manyChatID,
+    appointmentID,
+  } = scheduleData;
 
-  // Monta o array com os dados na ordem desejada
   const rowData = [
     fullName,
     birthDate,
     cpf,
     address,
     email,
-    advancePayment,
+    phone,  
+    procedure,  
+    howMet,  
+    responsibleDoctor,  
+    appointmentDate,  
+    advancePayment,  
+    manyChatID,  
+    appointmentID,  
   ];
 
-  // Adiciona os dados na segunda aba da planilha do Google.
   await appendRowToSecondSheet(rowData);
-  console.log('Dados de agendamento do usuário adicionados à segunda aba da planilha.');
+  console.log('Dados de agendamento do usuário adicionados à planilha:', rowData);
 }
