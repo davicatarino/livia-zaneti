@@ -668,6 +668,12 @@ export async function handleChat(req, res) {
     // Prepara o conteúdo da mensagem para enviar ao OpenAI
     console.log('Preparando conteúdo da mensagem');
     const messageContent = [];
+    
+    if (userMessage.includes("{{cuf_")) {
+      console.warn("⚠️ Placeholder ManyChat encontrado na mensagem. Substituindo por um valor vazio.");
+      userMessage = userMessage.replace(/{{cuf_[0-9]+}}/g, "");
+    }
+    
 
     if (userMessage && typeof userMessage === 'string') {
       messageContent.push({

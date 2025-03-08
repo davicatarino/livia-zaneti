@@ -9,22 +9,22 @@ export async function handleEvent(args) {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     console.log("📌 Recebendo argumentos na handleEvent:", args);
 
-    // Extração de dados do usuário (incluindo os novos campos: Endereco e PagamentoAntecipado)
     const {
       Name: userName,
-      ManyChatID: userID = null,  // Caso não venha, define como null
+      ManyChatID: userID = null,
       Email: userEmail,
       Horario: userHour,
       Telefone: userTel,
-      CPF: userCpf,
+      CPF: userCpf = "Não informado",
       Procedimento: userProced,
       ComoNosConheceu: userComoNosConheceu,
-      Nascimento: userNascimento,
-      endereco: userEndereco,
-      PagamentoConfirmado: userPagamento,
+      Nascimento: userNascimento = "Não informado",
+      endereco: userEndereco = "Não informado",
+      PagamentoConfirmado: userPagamento = false,
       DraResponsavel: userDraResponsavel,
       modelo: userModel,
     } = args || {}; // Evita erro caso args seja undefined
+    
     
     console.log("Dados extraídos:", {
       userName, userID, userEmail, userHour, userTel, userCpf, userProced,
@@ -33,7 +33,7 @@ export async function handleEvent(args) {
     });
     
 
-    const manyChatSource = userDraResponsavel === 'Marina' ? 'manyChat2' : 'manyChat1';
+    const manyChatSource = userDraResponsavel === 'Marina' ? 'manyChat1' : 'manyChat2';
     const color = userDraResponsavel === 'Marina' ? '1' : '2';
 
     console.log('Configurando ManyChat');
@@ -141,6 +141,19 @@ export async function handleEvent(args) {
       location: location,
       conferenceData: conferenceData,
     };
+    console.log("📌 Criando evento no Google Calendar com os seguintes dados:", {
+      Nome: userName,
+      Telefone: userTel,
+      Email: userEmail,
+      CPF: userCpf,
+      Endereço: userEndereco,
+      Procedimento: userProced,
+      Pagamento: userPagamento,
+      ComoNosConheceu: userComoNosConheceu,
+      DraResponsavel: userDraResponsavel,
+      Modelo: userModel
+    });
+    
     
     const response = await calendar.events.insert({
       calendarId: 'primary',
@@ -153,17 +166,24 @@ export async function handleEvent(args) {
 
     // Armazenando o eventId no ManyChat (se necessário)
     const eventId = response.data.id;
-    const fieldConfirmationID = userDraResponsavel === 'Marina' ? '12279844' : '12208054';
-    const fieldEventID = userDraResponsavel === 'Marina' ? '12279897' : '12213807'; // ID correspondente à doutora
+    const fieldConfirmationID = userDraResponsavel === 'Marina' ? '12279844' : '12441777';
+    const fieldEventID = userDraResponsavel === 'Marina' ? '12213807' : '12279897'; // ID correspondente à doutora
     console.log(`ID de campo selecionado: ${fieldConfirmationID} para ${userDraResponsavel}`);
-                
-    // Verifica a médica responsável para determinar qual ManyChat usar
-    const manyChatKey = userDraResponsavel === 'Marina' ? 'manyChat2' : 'manyChat1';
+
+    try {
+      const response =  await setManyChatCustomField(userID, fieldEventID, eventId, manyChatConfig);
+      console.log("✅ ManyChat eventID atualizado com sucesso:", response.data);
+    } catch (error) {
+      console.error("🚨 Erro ao atualizar campo eventID no ManyChat:", error.response ? error.response.data : error.message);
+    }
+    try {
+      const response =   await setManyChatCustomField(userID, fieldConfirmationID, 'sim', manyChatConfig);
+      console.log("✅ ManyChat pagou atualizado com sucesso:", response.data);
+    } catch (error) {
+      console.error("🚨 Erro ao atualizar campo pagou no ManyChat:", error.response ? error.response.data : error.message);
+    }
     
-    await setManyChatCustomField(userID, fieldEventID, eventId, manyChatConfig);
-    await setManyChatCustomField(userID, fieldConfirmationID, 'sim', manyChatConfig);
-    
-    console.log(`Campo personalizado ${fieldConfirmationID} atualizado para "sim" no ${manyChatKey}`);
+    console.log(`Campo personalizado ${fieldConfirmationID} atualizado para "sim" no ${manyChatConfig}`);
     
     // Chamando a função para salvar os dados do agendamento na planilha do Google
     // Os campos requeridos:
