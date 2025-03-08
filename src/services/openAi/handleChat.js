@@ -680,7 +680,7 @@ export async function handleChat(req, res) {
     if (isImage) {
       messageContent.push({
         type: 'image_url',
-        image_url: { url: userMessageMidia, detail: "hight" },
+        image_url: { url: userMessageMidia, detail: "high" },
       });
       console.log('Imagem adicionada ao conteúdo da mensagem:', userMessageMidia);
     }
